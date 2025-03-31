@@ -8,10 +8,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         filterBtnMobile.addEventListener('click', function(){
             filterPanel.classList.add('active');
+            document.documentElement.classList.add('overflowHidden');
         });
 
         filterClose.addEventListener('click', function(){
             filterPanel.classList.remove('active');
+            document.documentElement.classList.remove('overflowHidden');
         });
     }
 
@@ -102,11 +104,32 @@ document.addEventListener("DOMContentLoaded", function () {
         const input0 = document.querySelector(".input-with-keypress-0");
         const input1 = document.querySelector(".input-with-keypress-1");
         const inputs = [input0, input1];
+        
+        const minValElement = document.querySelector(".range_val .min_val");
+        const maxValElement = document.querySelector(".range_val .max_val");
 
-        const minVal = parseFloat(document.querySelector(".range_val .min_val").innerText.replace(/\s/g, ""));
-        const maxVal = parseFloat(document.querySelector(".range_val .max_val").innerText.replace(/\s/g, ""));
-        const startVal = parseFloat(input0.getAttribute("data-start").replace(/\s/g, ""));
-        const endVal = parseFloat(input1.getAttribute("data-end").replace(/\s/g, ""));
+        if (!minValElement || !maxValElement) {
+            console.error("Range value elements not found");
+            return;
+        }
+        
+        const minValRaw = minValElement.innerText;
+        const maxValRaw = maxValElement.innerText;        
+        const minVal = parseFloat(minValRaw);
+        const maxVal = parseFloat(maxValRaw);
+
+        if (isNaN(minVal) || isNaN(maxVal)) {
+            console.error("Invalid range values. Min:", minVal, "Max:", maxVal);
+            return;
+        }
+        
+        const startVal = parseFloat(input0.getAttribute("data-start").replace(/\s/g, "")) || minVal;
+        const endVal = parseFloat(input1.getAttribute("data-end").replace(/\s/g, "")) || maxVal;
+        
+        if (isNaN(startVal) || isNaN(endVal)) {
+            console.error("Invalid start/end values");
+            return;
+        }
 
         noUiSlider.create(keypressSlider, {
             start: [startVal, endVal],
