@@ -99,96 +99,106 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const keypressSlider = document.querySelector(".slider-keypress");
 
-    if (keypressSlider) {
+if (keypressSlider) {
+    const input0 = document.querySelector(".input-with-keypress-0");
+    const input1 = document.querySelector(".input-with-keypress-1");
+    const inputs = [input0, input1];
+    
+    const minValElement = document.querySelector(".range_val .min_val");
+    const maxValElement = document.querySelector(".range_val .max_val");
 
-        const input0 = document.querySelector(".input-with-keypress-0");
-        const input1 = document.querySelector(".input-with-keypress-1");
-        const inputs = [input0, input1];
-        
-        const minValElement = document.querySelector(".range_val .min_val");
-        const maxValElement = document.querySelector(".range_val .max_val");
+    if (!minValElement || !maxValElement) {
+        console.error("Range value elements not found");
+        return;
+    }
 
-        if (!minValElement || !maxValElement) {
-            console.error("Range value elements not found");
-            return;
-        }
-        
-        const minValRaw = minValElement.innerText;
-        const maxValRaw = maxValElement.innerText;        
-        const minVal = parseFloat(minValRaw);
-        const maxVal = parseFloat(maxValRaw);
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
 
-        if (isNaN(minVal) || isNaN(maxVal)) {
-            console.error("Invalid range values. Min:", minVal, "Max:", maxVal);
-            return;
-        }
-        
-        const startVal = parseFloat(input0.getAttribute("data-start").replace(/\s/g, "")) || minVal;
-        const endVal = parseFloat(input1.getAttribute("data-end").replace(/\s/g, "")) || maxVal;
-        
-        if (isNaN(startVal) || isNaN(endVal)) {
-            console.error("Invalid start/end values");
-            return;
-        }
+    function parseNumber(str) {
+        return parseInt(str.replace(/\s/g, ""), 10) || 0;
+    }
 
-        noUiSlider.create(keypressSlider, {
-            start: [startVal, endVal],
-            connect: true,
-            step: 1,
-            range: {
-                min: [minVal],
-                max: [maxVal]
+    const minVal = parseNumber(minValElement.innerText);
+    const maxVal = parseNumber(maxValElement.innerText);
+
+    if (isNaN(minVal) || isNaN(maxVal)) {
+        console.error("Invalid range values. Min:", minVal, "Max:", maxVal);
+        return;
+    }
+
+    const startVal = parseNumber(input0.getAttribute("data-start")) || minVal;
+    const endVal = parseNumber(input1.getAttribute("data-end")) || maxVal;
+
+    if (isNaN(startVal) || isNaN(endVal)) {
+        console.error("Invalid start/end values");
+        return;
+    }
+
+    noUiSlider.create(keypressSlider, {
+        start: [startVal, endVal],
+        connect: true,
+        step: 1,
+        range: {
+            min: [minVal],
+            max: [maxVal]
+        },
+        tooltips: [true, true], 
+        format: {
+            to: function(value) {
+                return formatNumber(Math.round(value));
             },
-            tooltips: [true, true], 
-            format: {
-                to: function(value) {
-                    return parseInt(value, 10); 
-                },
-                from: function(value) {
-                    return Number(value);
+            from: function(value) {
+                return parseNumber(value);
+            }
+        }
+    });
+
+    keypressSlider.noUiSlider.on("update", function (values, handle) {
+        inputs[handle].value = values[handle];
+
+        function setSliderHandle(i, value) {
+            let r = [null, null];
+            r[i] = parseNumber(value);
+            keypressSlider.noUiSlider.set(r);
+        }
+
+        inputs.forEach(function (input, handle) {
+            input.addEventListener("change", function () {
+                setSliderHandle(handle, this.value);
+            });
+
+            input.addEventListener("keydown", function (e) {
+                let values = keypressSlider.noUiSlider.get();
+                let value = parseNumber(values[handle]);
+
+                let steps = keypressSlider.noUiSlider.steps();
+                let step = steps[handle];
+                let position;
+
+                switch (e.which) {
+                    case 13:
+                        setSliderHandle(handle, this.value);
+                        break;
+                    case 38:
+                        position = step[1] || 1;
+                        setSliderHandle(handle, value + position);
+                        break;
+                    case 40:
+                        position = step[0] || 1;
+                        setSliderHandle(handle, value - position);
+                        break;
                 }
-            }
-        });
+            });
 
-        keypressSlider.noUiSlider.on("update", function (values, handle) {
-            inputs[handle].value = parseInt(values[handle], 10);
-
-            function setSliderHandle(i, value) {
-                let r = [null, null];
-                r[i] = value;
-                keypressSlider.noUiSlider.set(r);
-            }
-
-            inputs.forEach(function (input, handle) {
-                input.addEventListener("change", function () {
-                    setSliderHandle(handle, this.value);
-                });
-
-                input.addEventListener("keydown", function (e) {
-                    let values = keypressSlider.noUiSlider.get();
-                    let value = Number(values[handle]);
-
-                    let steps = keypressSlider.noUiSlider.steps();
-                    let step = steps[handle];
-                    let position;
-
-                    switch (e.which) {
-                        case 13:
-                            setSliderHandle(handle, this.value);
-                            break;
-                        case 38:
-                            position = step[1] || 1;
-                            setSliderHandle(handle, value + position);
-                            break;
-                        case 40:
-                            position = step[0] || 1;
-                            setSliderHandle(handle, value - position);
-                            break;
-                    }
-                });
+            input.addEventListener("input", function () {
+                this.value = formatNumber(parseNumber(this.value));
             });
         });
-    }
+    });
+}
+
 
     const amountBtn = document.querySelectorAll(".amount_block");
 
