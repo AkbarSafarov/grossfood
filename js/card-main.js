@@ -3,6 +3,26 @@ document.addEventListener("DOMContentLoaded", function () {
 	const prosuctImage = document.querySelector('.product_image');
 
 	if(prosuctImage){
+        
+
+        const thumbs = new Swiper ('.card_slider_thumb', {
+            direction: "horizontal",
+            spaceBetween: 15,
+            slidesPerView: 4,
+            breakpoints: {
+              768: {
+                direction: "vertical"
+              }
+            }
+        });
+
+        const swipesSlider = new Swiper('.card_slider', {
+            slidesPerView: 1,
+            thumbs: {
+              swiper: thumbs
+            },
+        });
+
 		lightGallery(prosuctImage, {
 	        animateThumb: false,
 	        zoomFromOrigin: false,
