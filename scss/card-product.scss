@@ -557,6 +557,10 @@
 		display: flex;
 		gap: 33px;
 		position: relative;
+		
+		@media all and (max-width: 767px){
+			overflow-x: auto;
+		}
 
 		&:before {
 			content: '';
@@ -578,6 +582,7 @@
 				line-height: 150%;
 				color: var(--text);
 				text-decoration: none;
+				white-space: nowrap;
 
 				&:before {
 					content: '';
@@ -669,7 +674,7 @@
 		.tabs_title {
 
 			&:before {
-				right: -100px;
+				right: 0;
 			}
 		}
 	}
